@@ -1,0 +1,71 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.common.proxy import Proxy, ProxyType
+# from selenium.webdriver.chrome.options import Options
+import time
+import urllib.request
+import requests
+# import mysql
+# .connector
+
+# mydb = mysql.connector.connect(
+#     host="localhost",
+#     user="yourusername",
+#     password="yourpassword"
+# )
+
+# print(mydb)
+
+PATH = r"C:\Users\Dell\Downloads\chromedriver_win32\chromedriver.exe"
+driver = webdriver.Chrome(PATH)
+driver.maximize_window()
+
+driver.get("https://instagram.com")
+
+# # login
+time.sleep(10)
+
+
+def loggedIn(userName, password):
+    user_name = driver.find_element(
+        By.XPATH, "//input[@name='username'][@type= 'text']")
+    pass_word = driver.find_element(
+        By.XPATH, "//input[@name='password'][@type= 'password']")
+    user_name.clear()
+    pass_word.clear()
+    user_name.send_keys(userName)
+    pass_word.send_keys(password)
+    login = driver.find_element(By.XPATH, "//button[@type= 'submit']").click()
+
+    # save you login info?
+    time.sleep(2)
+    notnow = driver.find_element(
+        By.XPATH, "//button[normalize-space()='Not Now']").click()
+    time.sleep(10)
+    notnow1 = driver.find_element(
+        By.XPATH, "//button[@class='_a9-- _a9_1']").click()
+
+
+# searchbox
+def searchBox():
+    searchBox = driver.find_element(
+        By.XPATH, "//div[@class='_aacl _aacp _aacu _aacx _aada'][normalize-space()='Search']").click()
+    time.sleep(5)
+    searchBox1 = driver.find_element(
+        By.XPATH, "//input[@placeholder='Search']")
+    searchBox1.clear()
+    searchBox1.send_keys("leomessi")
+    searchBox1.send_keys(Keys.ENTER)
+    time.sleep(5)
+    searchBox1.send_keys(Keys.ENTER)
+
+
+# main
+loggedIn("iambadmunda21", "Mazhar.122")
+searchBox()
+accountName = driver.find_element(
+    By.XPATH, "//h2[@class='_aacl _aacs _aact _aacx _aada']")
+accountFollowers = driver.find_element(
+    By.XPATH, "//a[@href='/leomessi/followers/']")
