@@ -2,68 +2,70 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.common.proxy import Proxy, ProxyType
-# from selenium.webdriver.chrome.options import Options
 import time
 import urllib.request
 import requests
-# import mysql
-# .connector
+import pandas as pd
 
-# mydb = mysql.connector.connect(
-#     host="localhost",
-#     user="yourusername",
-#     password="yourpassword"
-# )
 
-# print(mydb)
-
-PATH = r"C:\Users\Dell\Downloads\chromedriver_win32\chromedriver.exe"
+PATH = r"C:\Users\HP\Downloads\chromedriver_win32\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 driver.maximize_window()
 
 driver.get("https://instagram.com")
 
-# # login
-time.sleep(10)
+#login
 
-username = driver.find_element(
-    By.XPATH, "//input[@name='username'][@type= 'text']")
-password = driver.find_element(
-    By.XPATH, "//input[@name='password'][@type= 'password']")
-username.clear()
-password.clear()
+def loggedIn(userName, password):
+    time.sleep(5)
+    user_name = driver.find_element(
+        By.XPATH, "//input[@name='username'][@type= 'text']")
+    pass_word = driver.find_element(
+        By.XPATH, "//input[@name='password'][@type= 'password']")
+    user_name.clear()
+    pass_word.clear()
+    user_name.send_keys(userName)
+    pass_word.send_keys(password)
+    login = driver.find_element(By.XPATH, "//button[@type= 'submit']").click()
 
-username.send_keys("iambadmunda21")
-password.send_keys("Mazhar.122")
-login = driver.find_element(By.XPATH, "//button[@type= 'submit']")
-login.click()
-
-# save you login info?
-time.sleep(10)
-notnow = driver.find_element(
-    By.XPATH, "//button[normalize-space()='Not Now']").click()
-time.sleep(10)
-notnow1 = driver.find_element(
-    By.XPATH, "//button[@class='_a9-- _a9_1']").click()
-time.sleep(10)
+    # save you login info?
+    time.sleep(5)
+    notnow = driver.find_element(
+        By.XPATH, "//button[normalize-space()='Not Now']").click()
+    time.sleep(10)
+    notnow1 = driver.find_element(
+        By.XPATH, "//button[@class='_a9-- _a9_1']").click()
 
 
 # searchbox
-searchBox = driver.find_element(
-    By.XPATH, "//div[@class='_aacl _aacp _aacu _aacx _aada'][normalize-space()='Search']").click()
+def searchBox(search):
+    searchBox = driver.find_element(
+        By.XPATH, "//div[@class='_aacl _aacp _aacu _aacx _aada'][normalize-space()='Search']").click()
+    time.sleep(5)
+    searchBox1 = driver.find_element(
+        By.XPATH, "//input[@placeholder='Search']")
+    searchBox1.clear()
+    searchBox1.send_keys(search)
+    searchBox1.send_keys(Keys.ENTER)
+    time.sleep(5)
+    searchBox1.send_keys(Keys.ENTER)
 
-time.sleep(5)
-searchBox1 = driver.find_element(
-    By.XPATH, "//input[@placeholder='Search']")
-searchBox1.clear()
-searchBox1.send_keys("leomessi")
-searchBox1.send_keys(Keys.ENTER)
-time.sleep(5)
-searchBox1.send_keys(Keys.ENTER)
-time.sleep(5)
+def user_data():
+    URL = driver.current_url
+    time.sleep(10)
+    accountUsername = driver.find_element(By.XPATH, "//a[@href = '#'][@role ='link']/h2").text
+    accountName = driver.find_element(By.XPATH, "//span[@class='_aacl _aacp _aacw _aacx _aad7 _aade']").text
+    accountFollowers = driver.find_element(By.XPATH, "//a[@role='link']/div[@class='_aacl _aacp _aacu _aacx _aad6 _aade']/span[@class ='_ac2a']").get_attribute('title')
+    print(URL,accountUsername, accountName, accountFollowers)
 
-accountName = driver.find_element(
-    By.XPATH, "//h2[@class='_aacl _aacs _aact _aacx _aada']")
-accountFollowers = driver.find_element(
-    By.XPATH, "//a[@href='/leomessi/followers/']")
+# main
+loggedIn("iambadmunda21", "Mazhar.122")
+searchBox("leomessi")
+time.sleep(10)
+user_data()
+Following = driver.find_element(By.XPATH, "//a[@href='/leomessi/following/']//div[@class='_aacl _aacp _aacu _aacx _aad6 _aade']").click()
+time.sleep(5)
+n = driver.find_element(By.XPATH, "//a[@role='link']//span[contains(@class,'_aacl _aaco _aacw _aacx _aad7 _aade')]//div[contains(@class,'_ab94 _ab97 _ab9f _ab9k _ab9p _abcm')]").click()
+time.sleep(5)
+user_data()
+
