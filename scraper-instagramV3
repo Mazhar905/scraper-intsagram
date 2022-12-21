@@ -1,26 +1,22 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager as CM
 import time
-import urllib.request
 import requests
+import urllib.request
 import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager as CM
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+
 
 # Complete these 2 fields ==================
 # USERNAME = input('Enter Your Username: ')
 # PASSWORD = input('Enter Your Password: ')
 # usr = input('[Required] - Whose followers do you want to scrape: ')
 # user_input = int(input('[Required] - How many followers do you want to scrape (60-500 recommended): '))
-
-
-
 USERNAME = 'ma.zhar264'
 PASSWORD = 'Mazhar.123'
 usr = "leomessi"
@@ -69,28 +65,35 @@ def log_in(user_name, pass_word):
 
     driver.get('https://www.instagram.com/{}/'.format(usr))
 
-    time.sleep(3.5)
+    time.sleep(5)
 
 
 def user_data():
+    time.sleep(5)
     URL = driver.current_url
-    time.sleep(10)
-    accountUsername = driver.find_element(By.XPATH, "//a[@href = '#'][@role ='link']/h2").text
-    accountName = driver.find_element(By.XPATH, "//span[@class='_aacl _aacp _aacw _aacx _aad7 _aade']").text
-    accountFollowers = driver.find_element(By.XPATH, "//a[@role='link']/div[@class='_aacl _aacp _aacu _aacx _aad6 _aade']/span[@class ='_ac2a']").get_attribute('title')
-    print(URL,accountUsername, accountName, accountFollowers)
+    accountUsername = driver.find_element(
+        By.XPATH, "//a[@href = '#'][@role ='link']/h2").text
+    accountName = driver.find_element(
+        By.XPATH, "//span[@class='_aacl _aacp _aacw _aacx _aad7 _aade']").text
+    accountFollowers = driver.find_element(
+        By.XPATH, "//a[@role='link']/div[@class='_aacl _aacp _aacu _aacx _aad6 _aade']/span[@class ='_ac2a']").get_attribute('title')
+    if accountFollowers > 1000:
+        # save the data in Database
+        return URL, accountUsername, accountName, accountFollowers
+    else:
+        return driver.back()
 
 
 # main
 log_in(USERNAME, PASSWORD)
-time.sleep(10)
 user_data()
-Followers_list = driver.find_element(By.XPATH, "//a[@role='link']//div[@class='_aacl _aacp _aacu _aacx _aad6 _aade'][contains(text(),' following')]")
+Followers_list = driver.find_element(
+    By.XPATH, "//a[@role='link']//div[@class='_aacl _aacp _aacu _aacx _aad6 _aade'][contains(text(),' following')]")
 Followers_list.click()
 time.sleep(5)
-Followers = driver.find_element(By.XPATH, "//a[@role='link']//span[contains(@class,'_aacl _aaco _aacw _aacx _aad7 _aade')]//div[contains(@class,'_ab94 _ab97 _ab9f _ab9k _ab9p _abcm')]")
+Followers = driver.find_element(
+    By.XPATH, "//a[@role='link']//span[contains(@class,'_aacl _aaco _aacw _aacx _aad7 _aade')]//div[contains(@class,'_ab94 _ab97 _ab9f _ab9k _ab9p _abcm')]")
 Followers.click()
-time.sleep(5)
+for i in 
 user_data()
 driver.back()
-
