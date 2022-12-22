@@ -15,17 +15,17 @@ PASSWORD = 'Mazhar.123'
 usr = "leomessi"
 # ==========================================
 
-ig_xpath = {
-    # 'log_in_button': '//*[@id="react-root"]/section/nav/div[2]/div/div/div[3]/div/span/a[1]/button',
-    # 'username': '//*[@id="loginForm"]/div/div[1]/div/label/input',
-    #    'password': '//*[@id="loginForm"]/div/div[2]/div/label/input',
-    'six_digit': '//*[@id="react-root"]/section/main/div/div/div[1]/div/form/div[1]/div/label/input',
-    'deny_save_info': '//*[@id="react-root"]/section/main/div/div/div/div/button',
-    'followers': '//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a',
-    'following': '//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a',
-    'css_selector': '.notranslate. ',
-    'close_list': '/html/body/div[5]/div/div/div[1]/div/div[2]/button'
-}
+# ig_xpath = {
+#     # 'log_in_button': '//*[@id="react-root"]/section/nav/div[2]/div/div/div[3]/div/span/a[1]/button',
+#     # 'username': '//*[@id="loginForm"]/div/div[1]/div/label/input',
+#     #    'password': '//*[@id="loginForm"]/div/div[2]/div/label/input',
+#     'six_digit': '//*[@id="react-root"]/section/main/div/div/div[1]/div/form/div[1]/div/label/input',
+#     'deny_save_info': '//*[@id="react-root"]/section/main/div/div/div/div/button',
+#     'followers': '//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a',
+#     'following': '//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a',
+#     'css_selector': '.notranslate',
+#     'close_list': '/html/body/div[5]/div/div/div[1]/div/div[2]/button'
+# }
 
 TIMEOUT = 15
 
@@ -105,7 +105,14 @@ def get_user_info(user_name):
 
 
 def fetch_followers_list(user_name):
-    driver.get('https://www.instagram.com/'+user_name+'/following')
+    driver.get('https://www.instagram.com/{}/'.format(user_name))
+    # followers_list_button = driver.find_element(By.XPATH, "//ul/li[3]/a[@role='link']//div[contains(text(),' following')]")
+    followers_list_button = WebDriverWait(driver, TIMEOUT).until(
+        EC.presence_of_element_located((By.XPATH, "//ul/li[3]/a[@role='link']//div[contains(text(),' following')]")))
+    followers_list_button.click()
+    print(followers_list_button)
+
+    # driver.get('https://www.instagram.com/'+user_name+'/following')
 
     """Interacts with the webdriver and get the Instagram username 
     (set in the tools/credentials.py file) followers or following 
@@ -144,14 +151,16 @@ def fetch_followers_list(user_name):
     #     if last_count == length_of_page:
     #         match = True
 
-    followers = driver.find_elements_by_css_selector(ig_xpath['css_selector'])
+    followers = driver.find_elements(By.CSS_SELECTOR, 'notranslate').text
 
     followers_list = []
 
     for follower in followers:
-        followers_list.append(follower.text)
+        
+        print(follower[0])
+        # followers_list.append(follower)
 
-    driver.find_element_by_xpath(ig_xpath['close_list']).click()
+    # driver.find_element_by_xpath(ig_xpath['close_list']).click()
 
     return followers_list
 
@@ -161,13 +170,14 @@ def get_followers(user_name):
     # if False:  # check if database has scraped 10k user data then exit
     # exit()
     print(user_name)
+    data = get_user_info(user_name)
+    print(data)
     followers = fetch_followers_list(user_name)
     print(followers)
     # # print('followers of ', user_name, followers)
     # for follower in range(followers):
     #     try:
-    data = get_user_info(user_name)
-    print(data)
+    
     #         print('got info of ', user_name, '->', data['username'])
     #         if not data['saved']:
     #             # insert in db
