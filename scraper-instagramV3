@@ -1,16 +1,9 @@
 import time
-import requests
-import urllib.request
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager as CM
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-
 
 # Complete these 2 fields ==================
 # USERNAME = input('Enter Your Username: ')
@@ -22,7 +15,20 @@ PASSWORD = 'Mazhar.123'
 usr = "leomessi"
 # ==========================================
 
+ig_xpath = {
+    # 'log_in_button': '//*[@id="react-root"]/section/nav/div[2]/div/div/div[3]/div/span/a[1]/button',
+    # 'username': '//*[@id="loginForm"]/div/div[1]/div/label/input',
+    #    'password': '//*[@id="loginForm"]/div/div[2]/div/label/input',
+    'six_digit': '//*[@id="react-root"]/section/main/div/div/div[1]/div/form/div[1]/div/label/input',
+    'deny_save_info': '//*[@id="react-root"]/section/main/div/div/div/div/button',
+    'followers': '//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a',
+    'following': '//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a',
+    'css_selector': '.notranslate. ',
+    'close_list': '/html/body/div[5]/div/div/div[1]/div/div[2]/button'
+}
+
 TIMEOUT = 15
+
 
 options = webdriver.ChromeOptions()
 # options.add_argument("--headless")
@@ -31,44 +37,48 @@ options.add_argument("--log-level=3")
 mobile_emulation = {
     "userAgent": "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/90.0.1025.166 Mobile Safari/535.19"}
 options.add_experimental_option("mobileEmulation", mobile_emulation)
-
 driver = webdriver.Chrome(executable_path=CM().install(), options=options)
 # driver.set_window_size(600, 1000)
 driver.maximize_window()
 driver.get('https://www.instagram.com/accounts/login/')
 
 
-def log_in(user_name, pass_word):
-    time.sleep(2)
+# def execute_query(connection, query):
+#     cursor = connection.cursor()
+#     try:
+#         cursor.execute(query)
+#         connection.commit()
+#         print("Query executed successfully")
+#     except Exception as e:
+#         print(f"The error '{e}' occurred")
 
+
+def login(username, password):
+    time.sleep(2)
     print("[Info] - Logging in...")
 
     user_element = WebDriverWait(driver, TIMEOUT).until(
         EC.presence_of_element_located((
             By.XPATH, '//*[@id="loginForm"]/div[1]/div[3]/div/label/input')))
 
-    user_element.send_keys(user_name)
+    user_element.send_keys(username)
 
     pass_element = WebDriverWait(driver, TIMEOUT).until(
         EC.presence_of_element_located((
             By.XPATH, '//*[@id="loginForm"]/div[1]/div[4]/div/label/input')))
 
-    pass_element.send_keys(pass_word)
+    pass_element.send_keys(password)
 
     login_button = WebDriverWait(driver, TIMEOUT).until(
         EC.presence_of_element_located((
             By.XPATH, '//*[@id="loginForm"]/div[1]/div[6]/button')))
     time.sleep(0.4)
     login_button.click()
-
-    time.sleep(5)
-
-    driver.get('https://www.instagram.com/{}/'.format(usr))
-
     time.sleep(5)
 
 
-def user_data():
+def get_user_info(user_name):
+    driver.get('https://www.instagram.com/{}/'.format(user_name))
     time.sleep(5)
     URL = driver.current_url
     accountUsername = driver.find_element(
@@ -76,26 +86,103 @@ def user_data():
     accountName = driver.find_element(
         By.XPATH, "//span[@class='_aacl _aacp _aacw _aacx _aad7 _aade']").text
     userFollowers = driver.find_element(
-        By.XPATH, "//a[@role='link']/div[@class='_aacl _aacp _aacu _aacx _aad6 _aade']/span[@class ='_ac2a']").get_attribute('title')
-    Foll_int= int(userFollowers.replace(',', ''))
-    print(Foll_int)
-    if Foll_int > 1000:
-        # save the data in Database
-        print(URL, accountUsername, accountName, Foll_int)
-    else:
-        return driver.back()
+        By.XPATH, "//a[@role='link']/div/span[@class ='_ac2a']").get_attribute('title')
+    Foll_int = int(userFollowers.replace(',', ''))
+    return {
+        'username': accountUsername,
+        'Account link': URL,
+        'Account Name': accountName,
+        'Followers': Foll_int
+
+    }
 
 
-# main
-log_in(USERNAME, PASSWORD)
-user_data()
-Followers_list = driver.find_element(
-    By.XPATH, "//a[@role='link']//div[@class='_aacl _aacp _aacu _aacx _aad6 _aade'][contains(text(),' following')]")
-Followers_list.click()
-time.sleep(5)
-Followers = driver.find_element(
-    By.XPATH, "//a[@role='link']//span[contains(@class,'_aacl _aaco _aacw _aacx _aad7 _aade')]//div[contains(@class,'_ab94 _ab97 _ab9f _ab9k _ab9p _abcm')]")
-Followers.click()
-# for i in 
-user_data()
-driver.back()
+# def save_data(data):
+#     create_user = """"
+#     INSERT INTO users (username, followers)
+#     VALUES (""" + data["username"] + "," + data['followers'] + ");"
+#     execute_query(create_user)
+
+
+def fetch_followers_list(user_name):
+    driver.get('https://www.instagram.com/'+user_name+'/following')
+
+    """Interacts with the webdriver and get the Instagram username 
+    (set in the tools/credentials.py file) followers or following 
+    list.
+    Args:
+        driver (webdriver): A Selenium WebDriver.
+        which_list (str): Select the followers or following list.
+        time_sleep (int): Time in seconds that the script is 
+            going to wait until interact to the next element 
+            of the page.
+    Returns:
+        list: Followers or following list of the username.
+    """
+    # if which_list == 'followers':
+    #     which_list = ig_xpath['followers']
+    # elif which_list == 'following':
+    #     which_list = ig_xpath['following']
+
+    # driver.find_element_by_xpath(which_list).click()
+    # time.sleep(5)
+
+    # js_comand = '''
+    # let followers = document.querySelector(".isgrP")
+    # followers.scrollTo(0, followers.scrollHeight)
+    # let lenOfPage = followers.scrollHeight
+    # return lenOfPage
+    # '''
+
+    # length_of_page = driver.execute_script(js_comand)
+    # match = False
+
+    # while (match == False):
+    #     last_count = length_of_page
+    #     time.sleep(5)
+    #     length_of_page = driver.execute_script(js_comand)
+    #     if last_count == length_of_page:
+    #         match = True
+
+    followers = driver.find_elements_by_css_selector(ig_xpath['css_selector'])
+
+    followers_list = []
+
+    for follower in followers:
+        followers_list.append(follower.text)
+
+    driver.find_element_by_xpath(ig_xpath['close_list']).click()
+
+    return followers_list
+
+
+def get_followers(user_name):
+
+    # if False:  # check if database has scraped 10k user data then exit
+    # exit()
+    print(user_name)
+    followers = fetch_followers_list(user_name)
+    print(followers)
+    # # print('followers of ', user_name, followers)
+    # for follower in range(followers):
+    #     try:
+    data = get_user_info(user_name)
+    print(data)
+    #         print('got info of ', user_name, '->', data['username'])
+    #         if not data['saved']:
+    #             # insert in db
+    #             if data['followers'] > 5000:
+    #                 print('saving', data['username'], 'in db.')
+    #                 # save_data(data)
+    #             get_followers(data['username'])
+    #         else:
+    #             # user is already in db
+    #             print('already present', data)
+    #     except Exception as e:
+    #         print(e)
+    # return
+
+
+login(USERNAME, PASSWORD)
+
+get_followers(usr)
