@@ -1,4 +1,5 @@
 import time
+import json
 import mysql.connector
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,8 +12,8 @@ from selenium.webdriver.support import expected_conditions as EC
 # PASSWORD = input('Enter Your Password: ')
 # usr = input('[Required] - Whose followers do you want to scrape: ')
 # user_input = int(input('[Required] - How many followers do you want to scrape (60-500 recommended): '))
-USERNAME = 'iambadmunda21'
-PASSWORD = '01478520.369'
+userName = 'ma.zhar264'
+passWord = 'Mazhar.123'
 usr = "leomessi"
 # ==========================================
 
@@ -30,17 +31,6 @@ driver = webdriver.Chrome(executable_path=CM().install(), options=options)
 # driver.set_window_size(600, 1000)
 driver.maximize_window()
 driver.get('https://www.instagram.com/accounts/login/')
-
-
-def execute_query(connection, query):
-    cursor = connection.cursor()
-    try:
-        cursor.execute(query)
-        connection.commit()
-        print("Query executed successfully")
-    except Exception as e:
-        print(f"The error '{e}' occurred")
-
 
 def login(username, password):
     time.sleep(2)
@@ -66,38 +56,59 @@ def login(username, password):
     time.sleep(5)
 
 
-def get_user_info(user_name):
-    driver.get('https://www.instagram.com/{}/'.format(user_name))
+def get_user_info(user):
+    driver.get('https://www.instagram.com/{}/'.format(user))
     time.sleep(5)
+    print("[Info] - Getting "+user+" Info...")
+
     URL = driver.current_url
     accountUsername = driver.find_element(
-        By.XPATH, "//a[@href = '#'][@role ='link']/h2").text
+        By.XPATH, "/html/body/div[2]/div/div/div/div[1]/div/div/div/div[1]/section/main/div/header/section/div[1]//h2").text
     accountName = driver.find_element(
         By.XPATH, "//span[@class='_aacl _aacp _aacw _aacx _aad7 _aade']").text
     userFollowers = driver.find_element(
         By.XPATH, "//a[@role='link']/div/span[@class ='_ac2a']").get_attribute('title')
     Foll_int = int(userFollowers.replace(',', ''))
     return {
-        'username': accountUsername,
-        'Account link': URL,
-        'Account Name': accountName,
-        'Followers': Foll_int
-
+        'AccountUser': accountUsername,
+        'AccountURL': URL,
+        'AccountName': accountName,
+        'Follower': Foll_int
     }
 
 
-# def save_data(data):
-#     create_user = """"
-#     INSERT INTO users (username, followers)
-#     VALUES (""" + data["username"] + "," + data['followers'] + ");"
-#     execute_query(create_user)
+def save_data(insert_data):
+    mydb = mysql.connector.connect(
+        host = "localhost",
+        user = "root",
+        password = "",
+    database = "userdata"
+    )
+    mycursor = mydb.cursor()
+    j = json.dumps(insert_data)
+    values = json.loads(j) 
+    insert_stmt = ("INSERT IGNORE INTO user_list(USERNAME, ACCOUNT_URL, ACCOUNT_NAME, FOLLOWER)"
+   "VALUES (%s, %s, %s, %s)"
+    )
+    val = ( values['AccountUser'] , values['AccountURL'] , values['AccountName'], values['Follower'])
+    # Executing the SQL command
+    myresult = mycursor.execute("SELECT USERNAME FROM user_list")
+    if values['AccountUser'] != myresult:
+        print("[info] - Saving into Database... ")
+        mycursor.execute(insert_stmt, val)
+        print("[info] - Saved in Database... ")
+    else:
+        print("This User is already Exist.") 
+    mydb.commit()
+    mydb.close()
 
 
-def fetch_followers_list(user_name):
-    driver.get('https://www.instagram.com/{}/'.format(user_name))
+def fetch_followers_list(user_follow_list):
+    driver.get('https://www.instagram.com/{}/'.format(user_follow_list))
     followers_list_button = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.XPATH, "//ul/li[3]/a[@role='link']//div[contains(text(),' following')]")))
     followers_list_button.click()
     time.sleep(5)
+    print("[Info] - Fetching "+user_follow_list+ " User list...")
 
     """Interacts with the webdriver and get the Instagram username 
     (set in the tools/credentials.py file) followers or following 
@@ -111,41 +122,36 @@ def fetch_followers_list(user_name):
     Returns:
         list: Followers or following list of the username.
     """
-    time.sleep(5)
     time.sleep(20)
 
-    followers =     driver.find_elements_by_xpath("//a[@role='link']/span/div")
+    getfollowers =     driver.find_elements_by_xpath("//a[@role='link']/span/div")
     followers_list = []
 
-    for follower in followers:        
+    for follower in getfollowers:        
         followers_list.append(follower.text.replace('\nVerified', ''))
     return followers_list
 
 
-def get_followers(user_name):
+def get_followers_data(user_name):
     # if False:  # check if database has scraped 10k user data then exit
     # exit()
-    print(user_name)
     followers = fetch_followers_list(user_name)
-    print(followers)
-    # # print('followers of ', user_name, followers)
-    for follower in range(followers):
+    # print(followers)
+    for fol in followers:
         try:
-            data = get_user_info(user_name)
-            print(data)
-            print('got info of ', user_name, '->', data['username'])
-            if not data['saved']:
-                # insert in db
-                if data['followers'] > 5000:
-                    print('saving', data['username'], 'in db.')
+            data = get_user_info(fol)
+            if data['Follower'] > 1000:
                     # save_data(data)
-                get_followers(data['username'])
+                    # print(data)
+                save_data(data)
+                get_followers_data(data['AccountUser'])
+
             else:
                 # user is already in db
-                print('already present', data)
+                print("[Info] - The user have lowest followers...")
         except Exception as e:
             print(e)
     return
 
-login(USERNAME, PASSWORD)
-get_followers(usr)
+login(userName, passWord)
+get_followers_data(usr)
