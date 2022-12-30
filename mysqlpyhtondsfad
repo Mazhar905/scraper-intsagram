@@ -1,0 +1,89 @@
+import mysql.connector
+from mysql.connector import errorcode
+
+mydb = mysql.connector.connect(
+	host = "localhost",
+	user = "root",
+	password = "",
+  database = "userdetails"
+)
+print(mydb)
+# Creating an instance of 'cursor' class
+# which is used to execute the 'SQL'
+# statements in 'Python'
+mycursor = mydb.cursor()
+
+# Creating a database with a name
+# 'geeksforgeeks' execute() method
+# is used to compile a SQL statement
+# below statement is used to create
+# the 'geeksforgeeks' database
+# mycursor.execute('DROP TABLE student')
+# # mycursor.execute("CREATE DATABASE userdata")
+# studentRecord = """CREATE TABLE userlist (
+#                    USERNAME  VARCHAR(20) NOT NULL,
+#                    URL VARCHAR(50) NOT NULL,
+#                    NAME VARCHAR(50) NOT NULL,
+#                    FOLLOWER INT
+#                    )"""
+
+# mycursor.execute(studentRecord)
+# print('Databse Created')
+
+# def execute_query(connection, query):
+#     cursor = connection.cursor()
+#     try:
+#         cursor.execute(query)
+#         connection.commit()
+#         print("Query executed successfully")
+#     except Exception as e:
+#         print(f"The error '{e}' occurred")
+
+# Creating an instance of 'cursor' class
+# which is used to execute the 'SQL'
+# statements in 'Python'
+# mycursor = mydb.cursor()
+
+# Creating a database with a name
+# 'geeksforgeeks' execute() method
+# is used to compile a SQL statement
+# below statement is used to create
+# the 'geeksforgeeks' database
+mycursor.execute('DROP TABLE user_list')
+# mycursor.execute("CREATE DATABASE user_data")
+# mycursor.execute("DROP DATABASE userdata")
+studentRecord = """CREATE TABLE user_list (
+                   USERNAME  VARCHAR(20) NOT NULL,
+                   ACCOUNT_URL VARCHAR(50) NOT NULL,
+                   ACCOUNT_NAME VARCHAR(50) NOT NULL,
+                   FOLLOWER INT
+                   )"""
+
+mycursor.execute(studentRecord)
+print('New Table is Created')
+
+# create_user = """"
+# INSERT INTO users (username, followers)
+# VALUES (""" + data["username"] + "," + data['followers'] + ");"
+# execute_query(create_user)
+# mycursor.execute("SELECT USERNAME FROM user_list")
+
+# # This SQL statement selects all data from the CUSTOMER table.
+# result = mycursor.fetchall()
+# _username = []
+# for all in result:
+#     print(all)
+#     _username.append(all)
+# # usrlst =_username.replace("('", "").replace("',)", "")
+# print(_username)
+# #     if insert_data['AccountUser'] == all:
+# #         res =False
+# #     else:
+# #         res= True
+# #   return res
+# # if res == True:
+# #     print("[info] - Saving into Database... ")
+# #     mycursor.execute(insert_stmt, val)
+# #     print("[info] - Saved in Database... ")
+# # else:
+# #     print("This User is already Exist.") 
