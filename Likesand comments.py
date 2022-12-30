@@ -85,15 +85,8 @@ usr = "khloekardashian"
 # ==========================================
 TIMEOUT = 15
 login(USERNAME, PASSWORD)
-# thistuple = ("apple", "banana", "cherry")
 mycursor.execute("SELECT USERNAME FROM user_list")
-
-# This SQL statement selects all data from the CUSTOMER table.
 result = mycursor.fetchall()
-
 for i in result:
-    # print(result[i])
     data = get_user_info(i[0])
     print(data)
-    # print("Here is the another")
-    # print(i[0])
