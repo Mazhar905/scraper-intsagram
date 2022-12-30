@@ -1,5 +1,6 @@
 import time
 import json
+import random
 import mysql.connector
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,8 +13,11 @@ from selenium.webdriver.support import expected_conditions as EC
 # PASSWORD = input('Enter Your Password: ')
 # usr = input('[Required] - Whose followers do you want to scrape: ')
 # user_input = int(input('[Required] - How many followers do you want to scrape (60-500 recommended): '))
+userName =  'iambadmunda21'
+# userName = 'mazhardev1'
 userName = 'ma.zhar264'
-passWord = 'Mazhar.123'
+# passWord =  '01478520.369' 
+passWord =  'Mazhar.123' 
 usr = "leomessi"
 # ==========================================
 
@@ -31,6 +35,16 @@ driver = webdriver.Chrome(executable_path=CM().install(), options=options)
 # driver.set_window_size(600, 1000)
 driver.maximize_window()
 driver.get('https://www.instagram.com/accounts/login/')
+
+mydb = mysql.connector.connect(
+    host = "localhost",
+    user = "root",
+    password = "",
+database = "userdetails"
+)
+mycursor = mydb.cursor()
+
+
 
 def login(username, password):
     time.sleep(2)
@@ -60,7 +74,7 @@ def get_user_info(user):
     driver.get('https://www.instagram.com/{}/'.format(user))
     time.sleep(5)
     print("[Info] - Getting "+user+" Info...")
-
+    time.sleep(5)
     URL = driver.current_url
     accountUsername = driver.find_element(
         By.XPATH, "/html/body/div[2]/div/div/div/div[1]/div/div/div/div[1]/section/main/div/header/section/div[1]//h2").text
@@ -77,28 +91,25 @@ def get_user_info(user):
     }
 
 
-def save_data(insert_data):
+def save_data(insert_data):    
     mydb = mysql.connector.connect(
-        host = "localhost",
-        user = "root",
-        password = "",
-    database = "userdata"
-    )
+    host = "localhost",
+    user = "root",
+    password = "",
+database = "userdetails"
+)
     mycursor = mydb.cursor()
+
+    # Dumping user data into database
     j = json.dumps(insert_data)
     values = json.loads(j) 
     insert_stmt = ("INSERT IGNORE INTO user_list(USERNAME, ACCOUNT_URL, ACCOUNT_NAME, FOLLOWER)"
    "VALUES (%s, %s, %s, %s)"
     )
     val = ( values['AccountUser'] , values['AccountURL'] , values['AccountName'], values['Follower'])
-    # Executing the SQL command
-    myresult = mycursor.execute("SELECT USERNAME FROM user_list")
-    if values['AccountUser'] != myresult:
-        print("[info] - Saving into Database... ")
-        mycursor.execute(insert_stmt, val)
-        print("[info] - Saved in Database... ")
-    else:
-        print("This User is already Exist.") 
+    print("[Info] - Saving into Database... ")
+    mycursor.execute(insert_stmt, val)
+    print("[Info] - Saved in Database... ")
     mydb.commit()
     mydb.close()
 
@@ -110,19 +121,7 @@ def fetch_followers_list(user_follow_list):
     time.sleep(5)
     print("[Info] - Fetching "+user_follow_list+ " User list...")
 
-    """Interacts with the webdriver and get the Instagram username 
-    (set in the tools/credentials.py file) followers or following 
-    list.
-    Args:
-        driver (webdriver): A Selenium WebDriver.
-        which_list (str): Select the followers or following list.
-        time_sleep (int): Time in seconds that the script is 
-            going to wait until interact to the next element 
-            of the page.
-    Returns:
-        list: Followers or following list of the username.
-    """
-    time.sleep(20)
+    time.sleep(10)
 
     getfollowers =     driver.find_elements_by_xpath("//a[@role='link']/span/div")
     followers_list = []
@@ -137,18 +136,25 @@ def get_followers_data(user_name):
     # exit()
     followers = fetch_followers_list(user_name)
     # print(followers)
+    # random.shuffle(followers)
+    # print(followers)
     for fol in followers:
+        # print(fol)
         try:
-            data = get_user_info(fol)
-            if data['Follower'] > 1000:
-                    # save_data(data)
-                    # print(data)
-                save_data(data)
-                get_followers_data(data['AccountUser'])
-
+            mycursor.execute("SELECT USERNAME FROM user_list")
+            # This SQL statement selects all data from the USERNAME table.
+            result = mycursor.fetchall()
+            # mycursor.execute('set max_allowed_packet=67108864')
+            if not (any(fol in i for i in result)) :
+                data = get_user_info(fol)
+                if data['Follower'] > 1000:
+                    save_data(data)
+                    get_followers_data(data['AccountUser'])
+                else:
+                    print("[Notice] - " + data['AccountUser'] + " have less than 1000 followers.")
             else:
                 # user is already in db
-                print("[Info] - The user have lowest followers...")
+                print("[Notice]- " +fol+" is already Exist.")
         except Exception as e:
             print(e)
     return
