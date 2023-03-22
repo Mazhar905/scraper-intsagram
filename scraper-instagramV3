@@ -13,10 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 # PASSWORD = input('Enter Your Password: ')
 # usr = input('[Required] - Whose followers do you want to scrape: ')
 # user_input = int(input('[Required] - How many followers do you want to scrape (60-500 recommended): '))
-userName =  'iambadmunda21'
 # userName = 'mazhardev1'
-userName = 'ma.zhar264'
-# passWord =  '01478520.369' 
+userName = 'ma.zhar264' 
 passWord =  'Mazhar.123' 
 usr = "leomessi"
 # ==========================================
